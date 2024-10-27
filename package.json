@@ -1,0 +1,21 @@
+{
+  "name": "discordtosheets",
+  "version": "1.0.0",
+  "description": "A discord bot used to match a regex pattern on a channel and copy matching messages to a Google Sheets document",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "author": "Hawk Eye",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
+    "google-auth-library": "^9.14.2",
+    "google-spreadsheet": "^4.1.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
