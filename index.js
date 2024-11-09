@@ -43,19 +43,43 @@ const serviceAccountAuth = new JWT({
   scopes: SCOPES,
 });
 
-async function addToSheet(message) {
-  const doc = new GoogleSpreadsheet(SPREADSHEET_ID, serviceAccountAuth);
+let isAddingToSheet = false;
 
-  await doc.loadInfo(); // loads document properties and worksheets
-  console.log(doc.title);
-  const sheet = doc.sheetsByIndex[0];
-  message.content = message.content.replace(/\?ask\s*/, "").trim();
-  console.log(message.content);
-  await sheet.addRow({
-    Timestamp: message.createdAt.toISOString(),
-    Author: message.author.tag,
-    Content: message.content,
-  });
+async function addToSheet(message) {
+  // Prevent double execution by checking if it's already adding to the sheet
+  if (isAddingToSheet) {
+    console.warn("Attempted to add to sheet while already in process.");
+    return;
+  }
+
+  isAddingToSheet = true;
+
+  try {
+    const doc = new GoogleSpreadsheet(SPREADSHEET_ID, serviceAccountAuth);
+
+    // Load the spreadsheet
+    await doc.loadInfo();
+    console.log("Spreadsheet loaded:", doc.title);
+
+    // Select the first sheet
+    const sheet = doc.sheetsByIndex[0];
+    message.content = message.content.replace(/\?ask\s*/, "").trim();
+    console.log("Processed message content:", message.content);
+
+    // Add the message to the sheet
+    await sheet.addRow({
+      Timestamp: message.createdAt.toISOString(),
+      Author: message.author.tag,
+      Content: message.content,
+    });
+
+    console.log("Message added to sheet successfully:", message.content);
+  } catch (error) {
+    console.error("Error adding message to sheet:", error);
+  } finally {
+    // Reset the lock regardless of success or failure
+    isAddingToSheet = false;
+  }
 }
 
 client.once("ready", () => {
