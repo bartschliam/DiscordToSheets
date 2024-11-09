@@ -36,7 +36,7 @@ async function addToSheet(message) {
   await doc.loadInfo(); // loads document properties and worksheets
   console.log(doc.title);
   const sheet = doc.sheetsByIndex[0];
-  message.content = message.content.replace(/\?question\s*/, "").trim();
+  message.content = message.content.replace(/\?ask\s*/, "").trim();
   console.log(message.content);
   await sheet.addRow({
     Timestamp: message.createdAt.toISOString(),
