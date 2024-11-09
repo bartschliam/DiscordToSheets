@@ -1,7 +1,20 @@
 require("dotenv").config();
+const express = require("express");
 const { Client, GatewayIntentBits } = require("discord.js");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 const { JWT } = require("google-auth-library");
+
+// Setup Express server for Render
+const app = express();
+const PORT = process.env.PORT || 3000; // Use the PORT provided by Render
+
+app.get("/", (req, res) => {
+  res.send("Discord bot is running!");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
 
 const client = new Client({
   intents: [
