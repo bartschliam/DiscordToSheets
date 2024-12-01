@@ -63,17 +63,22 @@ async function addToSheet(message) {
 
     // Select the first sheet
     const sheet = doc.sheetsByIndex[0];
-    message.content = message.content.replace(/\?ask\s*/, "").trim();
+    const dynamicPattern = new RegExp(
+      `^\\s*\\${REGEX_PATTERN.source.slice(5, 9)}\\s*`,
+      "i"
+    );
+    message.content = message.content.replace(dynamicPattern, "").trim();
     console.log("Processed message content:", message.content);
+    if (message.content.length > 0) {
+      // Add the message to the sheet
+      await sheet.addRow({
+        Timestamp: message.createdAt.toISOString(),
+        Author: message.author.tag,
+        Content: message.content,
+      });
 
-    // Add the message to the sheet
-    await sheet.addRow({
-      Timestamp: message.createdAt.toISOString(),
-      Author: message.author.tag,
-      Content: message.content,
-    });
-
-    console.log("Message added to sheet successfully:", message.content);
+      console.log("Message added to sheet successfully:", message.content);
+    }
   } catch (error) {
     console.error("Error adding message to sheet:", error);
   } finally {
@@ -93,8 +98,15 @@ client.on("messageCreate", async (message) => {
   ) {
     try {
       await addToSheet(message);
-      console.log("Message added to sheet successfully");
-      await message.react("✅"); // Use any emoji you prefer
+      const fetchedMessage = await message.channel.messages
+        .fetch(message.id)
+        .catch(() => null);
+
+      if (fetchedMessage) {
+        await fetchedMessage.react("✅"); // React with the emoji if the message still exists
+      } else {
+        console.log("Message no longer exists, skipping reaction.");
+      }
     } catch (error) {
       console.error("Error adding message to sheet:", error);
       await message.react("❌"); // React with a different emoji to indicate failure
