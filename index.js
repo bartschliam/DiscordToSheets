@@ -24,7 +24,8 @@ const client = new Client({
   ],
 });
 
-const CHANNEL_ID = process.env.CHANNEL_ID;
+const CHANNEL_ID_RTC = process.env.CHANNEL_ID_RTC;
+const CHANNEL_ID_CLAN_CHAT = process.env.CHANNEL_ID_CLAN_CHAT;
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 const REGEX_PATTERN = new RegExp(process.env.REGEX_PATTERN);
 const SCOPES = [
@@ -45,7 +46,7 @@ const serviceAccountAuth = new JWT({
 
 let isAddingToSheet = false;
 
-async function addToSheet(message) {
+async function addToSheet(message, channel_id) {
   // Prevent double execution by checking if it's already adding to the sheet
   if (isAddingToSheet) {
     console.warn("Attempted to add to sheet while already in process.");
@@ -62,7 +63,12 @@ async function addToSheet(message) {
     console.log("Spreadsheet loaded:", doc.title);
 
     // Select the first sheet
-    const sheet = doc.sheetsByIndex[0];
+    let sheet;
+    if (channel_id === CHANNEL_ID_RTC) {
+      sheet = doc.sheetsByIndex[0];
+    } else if (channel_id === CHANNEL_ID_CLAN_CHAT) {
+      sheet = doc.sheetsByIndex[1];
+    }
     const dynamicPattern = new RegExp(
       `^\\s*\\${REGEX_PATTERN.source.slice(5, 9)}\\s*`,
       "i"
@@ -93,11 +99,12 @@ client.once("ready", () => {
 
 client.on("messageCreate", async (message) => {
   if (
-    message.channel.id === CHANNEL_ID &&
+    (message.channel.id === CHANNEL_ID_RTC ||
+      message.channel.id === CHANNEL_ID_CLAN_CHAT) &&
     REGEX_PATTERN.test(message.content)
   ) {
     try {
-      await addToSheet(message);
+      await addToSheet(message, message.channel.id);
       const fetchedMessage = await message.channel.messages
         .fetch(message.id)
         .catch(() => null);
