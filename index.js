@@ -78,7 +78,7 @@ async function addToSheet(message, channel_id, regex) {
       );
     } else if (regex === REGEX_PATTERN_TRIVIA) {
       dynamicPattern = new RegExp(
-        `^\\s*\\${REGEX_PATTERN_TRIVIA.source.slice(5, 12)}\\s*`,
+        `^\\s*\\${REGEX_PATTERN_TRIVIA.source.slice(5, 10)}\\s*`,
         "i"
       );
     }
