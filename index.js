@@ -28,6 +28,7 @@ const CHANNEL_ID_RTC = process.env.CHANNEL_ID_RTC;
 const CHANNEL_ID_CLAN_CHAT = process.env.CHANNEL_ID_CLAN_CHAT;
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 const REGEX_PATTERN = new RegExp(process.env.REGEX_PATTERN);
+const REGEX_PATTERN_TRIVIA = new RegExp(process.env.REGEX_PATTERN_TRIVIA);
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
   "https://www.googleapis.com/auth/drive.file",
@@ -46,7 +47,7 @@ const serviceAccountAuth = new JWT({
 
 let isAddingToSheet = false;
 
-async function addToSheet(message, channel_id) {
+async function addToSheet(message, channel_id, regex) {
   // Prevent double execution by checking if it's already adding to the sheet
   if (isAddingToSheet) {
     console.warn("Attempted to add to sheet while already in process.");
@@ -69,20 +70,35 @@ async function addToSheet(message, channel_id) {
     } else if (channel_id === CHANNEL_ID_CLAN_CHAT) {
       sheet = doc.sheetsByIndex[1];
     }
-    const dynamicPattern = new RegExp(
-      `^\\s*\\${REGEX_PATTERN.source.slice(5, 9)}\\s*`,
-      "i"
-    );
+    let dynamicPattern;
+    if (regex === REGEX_PATTERN) {
+      dynamicPattern = new RegExp(
+        `^\\s*\\${REGEX_PATTERN.source.slice(5, 9)}\\s*`,
+        "i"
+      );
+    } else if (regex === REGEX_PATTERN_TRIVIA) {
+      dynamicPattern = new RegExp(
+        `^\\s*\\${REGEX_PATTERN_TRIVIA.source.slice(5, 12)}\\s*`,
+        "i"
+      );
+    }
     message.content = message.content.replace(dynamicPattern, "").trim();
     console.log("Processed message content:", message.content);
     if (message.content.length > 0) {
       // Add the message to the sheet
-      await sheet.addRow({
-        Timestamp: message.createdAt.toISOString(),
-        Author: message.author.tag,
-        Content: message.content,
-      });
-
+      if (regex === REGEX_PATTERN) {
+        await sheet.addRow({
+          Timestamp: message.createdAt.toISOString(),
+          Author: message.author.tag,
+          Content: message.content,
+        });
+      } else if (regex === REGEX_PATTERN_TRIVIA) {
+        await sheet.addRow({
+          Timestamp: message.createdAt.toISOString(),
+          Author: message.author.tag,
+          Trivia: message.content,
+        });
+      }
       console.log("Message added to sheet successfully:", message.content);
     }
   } catch (error) {
@@ -104,7 +120,26 @@ client.on("messageCreate", async (message) => {
     REGEX_PATTERN.test(message.content)
   ) {
     try {
-      await addToSheet(message, message.channel.id);
+      await addToSheet(message, message.channel.id, REGEX_PATTERN);
+      const fetchedMessage = await message.channel.messages
+        .fetch(message.id)
+        .catch(() => null);
+
+      if (fetchedMessage) {
+        await fetchedMessage.react("✅"); // React with the emoji if the message still exists
+      } else {
+        console.log("Message no longer exists, skipping reaction.");
+      }
+    } catch (error) {
+      console.error("Error adding message to sheet:", error);
+      await message.react("❌"); // React with a different emoji to indicate failure
+    }
+  } else if (
+    message.channel.id === CHANNEL_ID_RTC &&
+    REGEX_PATTERN_TRIVIA.test(message.content)
+  ) {
+    try {
+      await addToSheet(message, message.channel.id, REGEX_PATTERN_TRIVIA);
       const fetchedMessage = await message.channel.messages
         .fetch(message.id)
         .catch(() => null);
