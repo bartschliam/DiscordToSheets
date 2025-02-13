@@ -27,7 +27,7 @@ const client = new Client({
 const CHANNEL_ID_RTC = process.env.CHANNEL_ID_RTC;
 const CHANNEL_ID_CLAN_CHAT = process.env.CHANNEL_ID_CLAN_CHAT;
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
-const REGEX_PATTERN = new RegExp(process.env.REGEX_PATTERN);
+const REGEX_PATTERN = new RegExp(process.env.REGEX_PATTERN, 'i');
 const REGEX_PATTERN_TRIVIA = new RegExp(process.env.REGEX_PATTERN_TRIVIA);
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
@@ -46,12 +46,14 @@ const serviceAccountAuth = new JWT({
 });
 
 let isAddingToSheet = false;
+let queue = 0;
 
 async function addToSheet(message, channel_id, regex) {
   // Prevent double execution by checking if it's already adding to the sheet
-  if (isAddingToSheet) {
+  while (isAddingToSheet) {
     console.warn("Attempted to add to sheet while already in process.");
-    return;
+    queue += 1;
+    await new Promise(resolve => setTimeout(resolve, 1000 * queue));
   }
 
   isAddingToSheet = true;
@@ -106,6 +108,7 @@ async function addToSheet(message, channel_id, regex) {
   } finally {
     // Reset the lock regardless of success or failure
     isAddingToSheet = false;
+    queue -= 1;
   }
 }
 
@@ -155,5 +158,49 @@ client.on("messageCreate", async (message) => {
     }
   }
 });
+
+// client.on("messageCreate", async (message) => {
+//   if (message.content.startsWith("!roleleaderboard")) {
+//     console.log(message.content);
+//     const members = await fetchAllMembers(message.guild);
+//     console.log(members)
+//     const number = 50
+//     const roleCounts = members
+//       .map((member) => ({ name: member.user.tag, count: member.roles.cache.size - 1 })) // Subtracting 1 to exclude "@everyone"
+//       .sort((a, b) => b.count - a.count) // Sort descending by role count
+//       .slice(0, number); // Get top 10
+
+//     if (roleCounts.length === 0) {
+//       return message.reply("No users found with roles.");
+//     }
+
+//     const leaderboard = roleCounts
+//       .map((m, i) => `**${i + 1}.** ${m.name}: ${m.count} roles`)
+//       .join("\n");
+
+//     message.channel.send(`**Top ${number} Members with Most Roles:**\n${leaderboard}`);
+//   }
+// });
+
+// async function fetchAllMembers(guild) {
+//   let allMembers = new Map(); // Store members uniquely
+//   let lastMemberId = undefined; // Used for pagination
+//   let limit = 1000; // Max per request
+
+//   while (true) {
+//     const members = await guild.members.list({
+//       limit,
+//       after: lastMemberId, // Fetch members **after** this ID
+//     });
+
+//     if (members.size === 0) break; // Stop when no more members
+
+//     members.forEach((member) => allMembers.set(member.id, member));
+//     lastMemberId = [...members.keys()].pop(); // Get last fetched member ID
+//   }
+
+//   return Array.from(allMembers.values()); // Convert map back to array
+// }
+
 
 client.login(process.env.DISCORD_BOT_TOKEN);
