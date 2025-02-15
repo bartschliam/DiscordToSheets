@@ -47,8 +47,22 @@ const serviceAccountAuth = new JWT({
 
 let isAddingToSheet = false;
 let queue = 0;
+const recentQuestions = new Set(); // Stores recent questions to prevent duplicates
 
 async function addToSheet(message, channel_id, regex) {
+  const questionText = message.content.trim().toLowerCase();
+  // Check if the question was recently asked
+  if (recentQuestions.has(questionText)) {
+    console.warn("Duplicate question detected, skipping:", questionText);
+    return; // Exit without adding to sheet
+  }
+
+  // Add to recent questions to prevent duplicates
+  recentQuestions.add(questionText);
+  // Set a timeout to remove the question after x minutes
+  setTimeout(() => recentQuestions.delete(questionText), 7200000); // 120 minutes
+
+
   // Prevent double execution by checking if it's already adding to the sheet
   while (isAddingToSheet) {
     console.warn("Attempted to add to sheet while already in process.");
