@@ -61,7 +61,7 @@ async function addToSheet(message, channel_id, regex) {
   recentQuestions.add(questionText);
   // Set a timeout to remove the question after x minutes
   setTimeout(() => recentQuestions.delete(questionText), 7200000); // 120 minutes
-
+  console.log(recentQuestions)
 
   // Prevent double execution by checking if it's already adding to the sheet
   while (isAddingToSheet) {
