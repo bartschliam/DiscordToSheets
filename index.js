@@ -30,7 +30,7 @@ const client = new Client({
 const CHANNEL_ID_RTC = process.env.CHANNEL_ID_RTC;
 const CHANNEL_ID_CLAN_CHAT = process.env.CHANNEL_ID_CLAN_CHAT;
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
-const REGEX_PATTERN = new RegExp(process.env.REGEX_PATTERN, 'i');
+const REGEX_PATTERN = new RegExp(process.env.REGEX_PATTERN, 'is');
 const REGEX_PATTERN_TRIVIA = new RegExp(process.env.REGEX_PATTERN_TRIVIA);
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
