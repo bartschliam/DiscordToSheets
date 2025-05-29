@@ -24,6 +24,7 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
   ],
 });
 
@@ -175,28 +176,65 @@ client.on("messageCreate", async (message) => {
   }
 });
 
+// // Role Leaderboard
 // client.on("messageCreate", async (message) => {
-//   if (message.content.startsWith("!roleleaderboard")) {
-//     console.log(message.content);
+//   const isLiam = message.author.username === 'liamtitan';
+
+//   if (message.content.startsWith("!roleleaderboard") & isLiam) {
+//     console.log('Authorized')
 //     const members = await fetchAllMembers(message.guild);
-//     console.log(members)
-//     const number = 50
+//     const number = 50;
+
 //     const roleCounts = members
-//       .map((member) => ({ name: member.user.tag, count: member.roles.cache.size - 1 })) // Subtracting 1 to exclude "@everyone"
-//       .sort((a, b) => b.count - a.count) // Sort descending by role count
-//       .slice(0, number); // Get top 10
+//       .map((member) => {
+//         // Filter out the @everyone role
+//         const roles = member.roles.cache
+//           .filter((r) => r.name !== "@everyone")
+//           .map((r) => r.name);
+
+//         return {
+//           name: member.user.tag,
+//           count: roles.length,
+//           roles: roles,
+//         };
+//       })
+//       .sort((a, b) => b.count - a.count)
+//       .slice(0, number);
 
 //     if (roleCounts.length === 0) {
 //       return message.reply("No users found with roles.");
 //     }
 
 //     const leaderboard = roleCounts
-//       .map((m, i) => `**${i + 1}.** ${m.name}: ${m.count} roles`)
+//       .map((m, i) => {
+//         const roleList = m.roles.join("\n, "); // Limit to first 5 roles to avoid message overflow
+//         return `**${i + 1}.** ${m.name}: ${m.count} roles (${roleList}})`;
+//       })
 //       .join("\n");
 
-//     message.channel.send(`**Top ${number} Members with Most Roles:**\n${leaderboard}`);
+//     // message.channel.send(`**Top ${number} Members with Most Roles:**\n${leaderboard}`);
+//     splitAndSend(message.channel, leaderboard);
+
 //   }
 // });
+
+// function splitAndSend(channel, content) {
+//   const maxLength = 2000;
+//   const lines = content.split('\n');
+//   let chunk = '';
+
+//   for (const line of lines) {
+//     if ((chunk + line + '\n').length > maxLength) {
+//       channel.send(chunk);
+//       chunk = '';
+//     }
+//     chunk += line + '\n';
+//   }
+
+//   if (chunk.length > 0) {
+//     channel.send(chunk);
+//   }
+// }
 
 // async function fetchAllMembers(guild) {
 //   let allMembers = new Map(); // Store members uniquely
@@ -217,6 +255,63 @@ client.on("messageCreate", async (message) => {
 
 //   return Array.from(allMembers.values()); // Convert map back to array
 // }
+
+// // Mass Assign Roles
+// client.on('messageCreate', async (message) => {
+//   if (!message.content.startsWith('!massassign') || message.author.bot) return;
+
+//   const isLiam = message.author.username === 'liamtitan';
+
+//   if (!isLiam) {
+//     console.log(`Unauthorized !massassign attempt by ${message.author.tag}`);
+//     return;
+//   }
+
+//   const lines = message.content.split('\n').slice(1); // skip the command itself
+//   if (lines.length < 2) {
+//     console.log('Invalid !massassign input: not enough lines');
+//     return message.reply('Include usernames and a role name or ID at the end.');
+//   }
+
+//   const roleIdentifier = lines.pop().trim(); // Last line = role name or ID
+//   const usernames = lines.map(line => line.trim()).filter(Boolean);
+
+//   const role = message.guild.roles.cache.find(
+//     r => r.name === roleIdentifier || r.id === roleIdentifier
+//   );
+
+//   if (!role) {
+//     return message.reply(`Role "${roleIdentifier}" not found.`);
+//   }
+
+//   let added = 0;
+//   let notFound = [];
+
+//   for (const username of usernames) {
+//     const members = await message.guild.members.fetch();
+//     const member = members.find(
+//       m => m.user.username === username
+//     );
+
+//     if (member) {
+//       try {
+//         await member.roles.add(role);
+//         added++;
+//         console.log(`✅ Added ${role.name} to ${username}`);
+//       } catch (err) {
+//         console.error(`❌ Failed to assign role to ${username}:`, err);
+//         notFound.push(`${username} (error)`);
+//       }
+//     } else {
+//       console.log(`❌ Username not found: ${username}`);
+//       notFound.push(username);
+//     }
+//   }
+
+//   message.reply(
+//     `✅ Assigned "${role.name}" to ${added} user(s).\n❌ ${notFound.length} not found:\n${notFound.join(', ')}`
+//   );
+// });
 
 
 client.login(process.env.DISCORD_BOT_TOKEN);
