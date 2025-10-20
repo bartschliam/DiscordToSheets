@@ -19,7 +19,11 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
+  const currentYear = new Date().getFullYear() + 10000; // adds 10000 to make 2025 → 12025
   console.log(`Server listening on port ${PORT}`);
+  console.log(`The correct best date format is yyyy/mm/dd`);
+  console.log(`The current year is ${currentYear}`);
+  console.log(`The correct measurement system is metric, not imperial`);
 });
 
 const client = new Client({
@@ -223,54 +227,54 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-// Role Leaderboard
-client.on("messageCreate", async (message) => {
-  // Ensure we're in the correct server
-  const guild = client.guilds.cache.get("412572204954288128");
-  if (!guild) {
-    console.log("Server Clash of Clans Events not found. Skipping.");
-    return;
-  }
+// // Role Leaderboard
+// client.on("messageCreate", async (message) => {
+//   // Ensure we're in the correct server
+//   const guild = client.guilds.cache.get("412572204954288128");
+//   if (!guild) {
+//     console.log("Server Clash of Clans Events not found. Skipping.");
+//     return;
+//   }
 
-  const isLiam = message.author.username === 'liamtitan';
+//   const isLiam = message.author.username === 'liamtitan';
 
-  if (message.content.startsWith("!roleleaderboard") & isLiam) {
-    console.log('Authorized')
-    const members = await fetchAllMembers(message.guild);
-    const number = 50;
+//   if (message.content.startsWith("!roleleaderboard") & isLiam) {
+//     console.log('Authorized')
+//     const members = await fetchAllMembers(message.guild);
+//     const number = 50;
 
-    const roleCounts = members
-      .map((member) => {
-        // Filter out the @everyone role
-        const roles = member.roles.cache
-          .filter((r) => r.name !== "@everyone")
-          .map((r) => r.name);
+//     const roleCounts = members
+//       .map((member) => {
+//         // Filter out the @everyone role
+//         const roles = member.roles.cache
+//           .filter((r) => r.name !== "@everyone")
+//           .map((r) => r.name);
 
-        return {
-          name: member.user.tag,
-          count: roles.length,
-          roles: roles,
-        };
-      })
-      .sort((a, b) => b.count - a.count)
-      .slice(0, number);
+//         return {
+//           name: member.user.tag,
+//           count: roles.length,
+//           roles: roles,
+//         };
+//       })
+//       .sort((a, b) => b.count - a.count)
+//       .slice(0, number);
 
-    if (roleCounts.length === 0) {
-      return message.reply("No users found with roles.");
-    }
+//     if (roleCounts.length === 0) {
+//       return message.reply("No users found with roles.");
+//     }
 
-    const leaderboard = roleCounts
-      .map((m, i) => {
-        const roleList = m.roles.join("\n, "); // Limit to first 5 roles to avoid message overflow
-        return `**${i + 1}.** ${m.name}: ${m.count} roles (${roleList}})`;
-      })
-      .join("\n");
+//     const leaderboard = roleCounts
+//       .map((m, i) => {
+//         const roleList = m.roles.join("\n, "); // Limit to first 5 roles to avoid message overflow
+//         return `**${i + 1}.** ${m.name}: ${m.count} roles (${roleList}})`;
+//       })
+//       .join("\n");
 
-    // message.channel.send(`**Top ${number} Members with Most Roles:**\n${leaderboard}`);
-    splitAndSend(message.channel, leaderboard);
+//     // message.channel.send(`**Top ${number} Members with Most Roles:**\n${leaderboard}`);
+//     splitAndSend(message.channel, leaderboard);
 
-  }
-});
+//   }
+// });
 
 function splitAndSend(channel, content) {
   const maxLength = 2000;
@@ -310,69 +314,69 @@ async function fetchAllMembers(guild) {
   return Array.from(allMembers.values()); // Convert map back to array
 }
 
-// Mass Assign Roles
-client.on('messageCreate', async (message) => {
-  // Ensure we're in the correct server
-  const guild = client.guilds.cache.get("412572204954288128");
-  if (!guild) {
-    console.log("Server Clash of Clans Events not found. Skipping.");
-    return;
-  }
+// // Mass Assign Roles
+// client.on('messageCreate', async (message) => {
+//   // Ensure we're in the correct server
+//   const guild = client.guilds.cache.get("412572204954288128");
+//   if (!guild) {
+//     console.log("Server Clash of Clans Events not found. Skipping.");
+//     return;
+//   }
 
-  if (!message.content.startsWith('!massassign') || message.author.bot) return;
+//   if (!message.content.startsWith('!massassign') || message.author.bot) return;
 
-  const isLiam = message.author.username === 'liamtitan';
+//   const isLiam = message.author.username === 'liamtitan';
 
-  if (!isLiam) {
-    console.log(`Unauthorized !massassign attempt by ${message.author.tag}`);
-    return;
-  }
+//   if (!isLiam) {
+//     console.log(`Unauthorized !massassign attempt by ${message.author.tag}`);
+//     return;
+//   }
 
-  const lines = message.content.split('\n').slice(1); // skip the command itself
-  if (lines.length < 2) {
-    console.log('Invalid !massassign input: not enough lines');
-    return message.reply('Include usernames and a role name or ID at the end.');
-  }
+//   const lines = message.content.split('\n').slice(1); // skip the command itself
+//   if (lines.length < 2) {
+//     console.log('Invalid !massassign input: not enough lines');
+//     return message.reply('Include usernames and a role name or ID at the end.');
+//   }
 
-  const roleIdentifier = lines.pop().trim(); // Last line = role name or ID
-  const usernames = lines.map(line => line.trim()).filter(Boolean);
+//   const roleIdentifier = lines.pop().trim(); // Last line = role name or ID
+//   const usernames = lines.map(line => line.trim()).filter(Boolean);
 
-  const role = message.guild.roles.cache.find(
-    r => r.name === roleIdentifier || r.id === roleIdentifier
-  );
+//   const role = message.guild.roles.cache.find(
+//     r => r.name === roleIdentifier || r.id === roleIdentifier
+//   );
 
-  if (!role) {
-    return message.reply(`Role "${roleIdentifier}" not found.`);
-  }
+//   if (!role) {
+//     return message.reply(`Role "${roleIdentifier}" not found.`);
+//   }
 
-  let added = 0;
-  let notFound = [];
+//   let added = 0;
+//   let notFound = [];
 
-  for (const username of usernames) {
-    const members = await message.guild.members.fetch();
-    const member = members.find(
-      m => m.user.username === username
-    );
+//   for (const username of usernames) {
+//     const members = await message.guild.members.fetch();
+//     const member = members.find(
+//       m => m.user.username === username
+//     );
 
-    if (member) {
-      try {
-        await member.roles.add(role);
-        added++;
-        console.log(`✅ Added ${role.name} to ${username}`);
-      } catch (err) {
-        console.error(`❌ Failed to assign role to ${username}:`, err);
-        notFound.push(`${username} (error)`);
-      }
-    } else {
-      console.log(`❌ Username not found: ${username}`);
-      notFound.push(username);
-    }
-  }
+//     if (member) {
+//       try {
+//         await member.roles.add(role);
+//         added++;
+//         console.log(`✅ Added ${role.name} to ${username}`);
+//       } catch (err) {
+//         console.error(`❌ Failed to assign role to ${username}:`, err);
+//         notFound.push(`${username} (error)`);
+//       }
+//     } else {
+//       console.log(`❌ Username not found: ${username}`);
+//       notFound.push(username);
+//     }
+//   }
 
-  message.reply(
-    `✅ Assigned "${role.name}" to ${added} user(s).\n❌ ${notFound.length} not found:\n${notFound.join(', ')}`
-  );
-});
+//   message.reply(
+//     `✅ Assigned "${role.name}" to ${added} user(s).\n❌ ${notFound.length} not found:\n${notFound.join(', ')}`
+//   );
+// });
 
 
 client.login(process.env.DISCORD_BOT_TOKEN);
