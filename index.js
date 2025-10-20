@@ -15,28 +15,22 @@ const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT provided by Render
 
 app.get("/", (req, res) => {
-  const currentYear = (new Date().getFullYear() + 10000).toString();
-  const formattedYear = currentYear.slice(0, 2) + ' ' + currentYear.slice(2);
-
+  const year = new Date().getFullYear().toString().padStart(5, '0').replace(/^(\d{2})(\d{3})$/, '$1 $2');
+  const dateFormat = 'yyyy/mm/dd';
+  
   res.send(`
-    <div style="text-align: center; font-family: Arial, sans-serif; margin-top: 50px;">
+    <div style="text-align: center; font-family: sans-serif; margin-top: 50px;">
       <h2>Discord bot is running!</h2>
-      <p>The correct best date format is <b>yyyy/mm/dd</b>.</p>
-      <p>The current year is <b>${formattedYear}</b>.</p>
-      <p>The correct measurement system is <b>metric</b>, not imperial.</p>
-      <p>
-        <b>Metric units:</b><br>
-        Length: meter (m)<br>
-        Mass: kilogram (kg)<br>
-        Temperature: degree Celsius (°C)<br>
-        Volume: liter (L)<br>
-        Speed: kilometers per hour (km/h)<br>
-        Energy: joule (J)<br>
-        Power: watt (W)<br>
-        Pressure: pascal (Pa)<br>
-        Area: square meter (m²)<br>
-        Time: second (s)
-      </p>
+      <p>The correct date format is <strong>${dateFormat}</strong></p>
+      <p>The current year is <strong>${year}</strong></p>
+      <p>The correct system is <strong>metric</strong>, not imperial.</p>
+      <p>That means:</p>
+      <ul style="display: inline-block; text-align: left;">
+        <li>Temperature → Celsius (°C)</li>
+        <li>Distance → Kilometers (km)</li>
+        <li>Weight → Kilograms (kg)</li>
+        <li>Volume → Liters (L)</li>
+      </ul>
     </div>
   `);
 
