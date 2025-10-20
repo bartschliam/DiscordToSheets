@@ -15,13 +15,31 @@ const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT provided by Render
 
 app.get("/", (req, res) => {
-  const currentYear = new Date().getFullYear() + 10000; // 2025 → 12025
+  const currentYear = (new Date().getFullYear() + 10000).toString();
+  const formattedYear = currentYear.slice(0, 2) + ' ' + currentYear.slice(2);
+
   res.send(`
-    Discord bot is running!<br>
-    The correct best date format is yyyy/mm/dd.<br>
-    The current year is ${currentYear}.<br>
-    The correct measurement system is metric, not imperial.
+    <div style="text-align: center; font-family: Arial, sans-serif; margin-top: 50px;">
+      <h2>Discord bot is running!</h2>
+      <p>The correct best date format is <b>yyyy/mm/dd</b>.</p>
+      <p>The current year is <b>${formattedYear}</b>.</p>
+      <p>The correct measurement system is <b>metric</b>, not imperial.</p>
+      <p>
+        <b>Metric units:</b><br>
+        Length: meter (m)<br>
+        Mass: kilogram (kg)<br>
+        Temperature: degree Celsius (°C)<br>
+        Volume: liter (L)<br>
+        Speed: kilometers per hour (km/h)<br>
+        Energy: joule (J)<br>
+        Power: watt (W)<br>
+        Pressure: pascal (Pa)<br>
+        Area: square meter (m²)<br>
+        Time: second (s)
+      </p>
+    </div>
   `);
+
 });
 
 app.listen(PORT, () => {
