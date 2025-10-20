@@ -15,7 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT provided by Render
 
 app.get("/", (req, res) => {
-  const year = new Date().getFullYear().toString().padStart(5, '0').replace(/^(\d{2})(\d{3})$/, '$1 $2');
+  const year = (10000 + new Date().getFullYear()).toString().replace(/^(\d{2})(\d{3})$/, '$1 $2');
   const dateFormat = 'yyyy/mm/dd';
   
   res.send(`
