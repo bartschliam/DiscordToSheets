@@ -15,15 +15,17 @@ const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT provided by Render
 
 app.get("/", (req, res) => {
-  res.send("Discord bot is running!");
+  const currentYear = new Date().getFullYear() + 10000; // 2025 → 12025
+  res.send(`
+    Discord bot is running!<br>
+    The correct best date format is yyyy/mm/dd.<br>
+    The current year is ${currentYear}.<br>
+    The correct measurement system is metric, not imperial.
+  `);
 });
 
 app.listen(PORT, () => {
-  const currentYear = new Date().getFullYear() + 10000; // adds 10000 to make 2025 → 12025
   console.log(`Server listening on port ${PORT}`);
-  console.log(`The correct best date format is yyyy/mm/dd`);
-  console.log(`The current year is ${currentYear}`);
-  console.log(`The correct measurement system is metric, not imperial`);
 });
 
 const client = new Client({
