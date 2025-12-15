@@ -96,12 +96,64 @@ function renderStatusPage() {
         return { start, end };
       }
 
+      function getNextSeasonEndUTC() {
+        const now = new Date();
+        let event = new Date(Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          1,
+          8, 0, 0
+        ));
+
+        if (now >= event) {
+          event.setUTCMonth(event.getUTCMonth() + 1);
+        }
+
+        return event;
+      }
+
+      function getNextLeagueResetUTC() {
+        const now = new Date();
+
+        // start at first day of current month at 05:00 UTC
+        let event = new Date(Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          1,
+          5, 0, 0
+        ));
+
+        // move forward to first Monday
+        const day = event.getUTCDay(); // 0 = Sun, 1 = Mon
+        const diff = (1 - day + 7) % 7;
+        event.setUTCDate(event.getUTCDate() + diff);
+
+        // if already passed, compute next month instead
+        if (now >= event) {
+          event = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth() + 1,
+            1,
+            5, 0, 0
+          ));
+          const d = event.getUTCDay();
+          const df = (1 - d + 7) % 7;
+          event.setUTCDate(event.getUTCDate() + df);
+        }
+
+        return event;
+      }
+
+
       const events = [
         { name: 'Clan Games', time: getNextDateUTC(22, 8) },
         { name: 'CWL', time: getNextDateUTC(1, 8) },
-        { name: 'Trader Refresh', time: getNextWeekdayUTC(2, 8) }, // Tuesday
+        { name: 'Season End', time: getNextSeasonEndUTC() },
+        { name: 'League Reset', time: getNextLeagueResetUTC() },
+        { name: 'Trader Refresh', time: getNextWeekdayUTC(2, 8) },
         { name: 'Raid Weekend', time: getNextRaidUTC().start, endTime: getNextRaidUTC().end }
       ];
+
 
       // Sort by closest upcoming
       events.sort((a, b) => a.time - b.time);
