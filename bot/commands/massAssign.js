@@ -39,7 +39,7 @@ module.exports = {
     const members = await message.guild.members.fetch();
 
     for (const username of usernames) {
-      const member = members.find(m => m.user.username === username);
+      const member = members.find(m => m.user.username.toLowerCase() === username.toLowerCase());
       if (member) {
         try {
           await member.roles.add(role);
