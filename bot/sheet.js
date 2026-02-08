@@ -47,11 +47,9 @@ async function addToSheet(message, channel_id, regex, channels, patterns) {
       channel_id === channels.RTC ? 0 : channel_id === channels.CLAN_CHAT ? 1 : null
     ];
 
-    const dynamicPattern = new RegExp(
-      `^\\s*\\${regex.source.slice(5, 9)}\\s*`,
-      'i'
-    );
-    message.content = message.content.replace(dynamicPattern, '').trim();
+    // Strip the leading command token (e.g. !join, ?ask) so only the payload is stored.
+    const commandPrefixPattern = /^\s*[!?][^\s]+\s*/i;
+    message.content = message.content.replace(commandPrefixPattern, '').trim();
     console.log("Processed message content:", message.content);
 
     if (message.content.length > 0) {
